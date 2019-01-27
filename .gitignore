@@ -190,3 +190,4 @@ $RECYCLE.BIN/
 
 *.iml
 .idea/
+*.sqlite
