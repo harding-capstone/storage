@@ -1,5 +1,10 @@
 package com.shepherdjerred.capstone.storage;
 
-public class SampleTest {
+import org.junit.Test;
 
+public class SampleTest {
+  @Test
+  public void createTableCreatesTable() {
+    new SampleClass().createTable();
+  }
 }
