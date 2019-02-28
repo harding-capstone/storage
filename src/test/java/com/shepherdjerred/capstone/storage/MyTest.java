@@ -15,8 +15,10 @@ import com.shepherdjerred.capstone.storage.save.SavedGameFile;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Instant;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class MyTest {
 
   @Test

@@ -1,4 +1,4 @@
-module com.shepherdjerred.capstone.storage {
+open module com.shepherdjerred.capstone.storage {
   requires static lombok;
   requires com.zaxxer.hikari;
   requires java.sql;
@@ -6,4 +6,5 @@ module com.shepherdjerred.capstone.storage {
   requires org.apache.logging.log4j;
   requires com.google.common;
   requires gson;
+  exports com.shepherdjerred.capstone.storage.save;
 }
