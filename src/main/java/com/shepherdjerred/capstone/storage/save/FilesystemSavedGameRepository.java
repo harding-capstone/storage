@@ -2,9 +2,9 @@ package com.shepherdjerred.capstone.storage.save;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.shepherdjerred.capstone.logic.board.BoardPieces;
 import com.shepherdjerred.capstone.logic.match.Match;
-import com.shepherdjerred.capstone.logic.serialization.BoardPiecesDeserializer;
+import com.shepherdjerred.capstone.logic.piece.Piece;
+import com.shepherdjerred.capstone.logic.
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,7 +22,8 @@ public class FilesystemSavedGameRepository implements SavedGameRepository {
 
   static {
     gson = new GsonBuilder()
-        .registerTypeAdapter(BoardPieces.class, new BoardPiecesDeserializer())
+        .registerTypeAdapter(Piece.class, new AbstractClassGsonAdapter())
+        .enableComplexMapKeySerialization()
         .create();
   }
 
@@ -67,6 +68,8 @@ public class FilesystemSavedGameRepository implements SavedGameRepository {
 
   @Override
   public void saveMatch(String name, Match match) throws IOException {
+    var serializer = new MatchJsonSerializer();
+
     try (var writer = new FileWriter(name)) {
       gson.toJson(match, writer);
     }

@@ -1,15 +1,10 @@
 package com.shepherdjerred.capstone.storage;
 
-import com.shepherdjerred.capstone.logic.board.Board;
-import com.shepherdjerred.capstone.logic.board.BoardPieces;
-import com.shepherdjerred.capstone.logic.board.BoardPiecesInitializer;
 import com.shepherdjerred.capstone.logic.board.BoardSettings;
-import com.shepherdjerred.capstone.logic.board.layout.BoardCellsInitializer;
-import com.shepherdjerred.capstone.logic.board.layout.BoardLayout;
 import com.shepherdjerred.capstone.logic.match.Match;
 import com.shepherdjerred.capstone.logic.match.MatchSettings;
-import com.shepherdjerred.capstone.logic.match.MatchSettings.PlayerCount;
-import com.shepherdjerred.capstone.logic.player.PlayerId;
+import com.shepherdjerred.capstone.logic.player.PlayerCount;
+import com.shepherdjerred.capstone.logic.player.QuoridorPlayer;
 import com.shepherdjerred.capstone.storage.save.FilesystemSavedGameRepository;
 import com.shepherdjerred.capstone.storage.save.SavedGameFile;
 import java.io.IOException;
@@ -28,7 +23,8 @@ public class MyTest {
     System.out.println(currentRelativePath.toString());
 
     var repository = new FilesystemSavedGameRepository(currentRelativePath);
-    var match = createMatch();
+    var match = Match.from(new MatchSettings(10, QuoridorPlayer.ONE, PlayerCount.TWO),
+        new BoardSettings(9, PlayerCount.TWO));
 
     repository.saveMatch("My match.match", match);
 
@@ -39,17 +35,5 @@ public class MyTest {
     var loadedGame = repository.loadMatch(savedGame);
 
     System.out.println(match.equals(loadedGame.get()));
-  }
-
-  private Match createMatch() {
-    var boardSettings = new BoardSettings(9, PlayerCount.TWO);
-    var matchSettings = new MatchSettings(10, PlayerId.ONE, boardSettings);
-
-    var boardLayout = BoardLayout.fromBoardSettings(new BoardCellsInitializer(), boardSettings);
-    var boardPieces = BoardPieces.initializePieceLocations(boardSettings,
-        new BoardPiecesInitializer());
-    var board = Board.createBoard(boardLayout, boardPieces);
-    var match = Match.startNewMatch(matchSettings, board);
-    return match;
   }
 }
