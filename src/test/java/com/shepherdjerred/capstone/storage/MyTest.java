@@ -18,6 +18,8 @@ import org.junit.Test;
 
 public class MyTest {
 
+  private String fileName = "My match.match";
+
   @Test
   public void testSaves() throws IOException {
     var currentRelativePath = Paths.get("").toAbsolutePath();
@@ -28,18 +30,18 @@ public class MyTest {
     var match = Match.from(new MatchSettings(10, QuoridorPlayer.ONE, PlayerCount.TWO),
         new BoardSettings(9, PlayerCount.TWO));
 
-    repository.saveMatch("My match.match", match);
+    repository.saveMatch(fileName, match);
 
     var savedGames = repository.getSaves();
     System.out.println(savedGames);
 
-    var savedGame = new SavedGameFile("My match.match", Instant.now(), currentRelativePath);
+    var savedGame = new SavedGameFile(fileName, Instant.now(), currentRelativePath);
     var loadedGame = repository.loadMatch(savedGame);
 
     Assert.assertTrue(loadedGame.isPresent());
     Assert.assertTrue(compareMatch(match, loadedGame.get()));
-    
-    Files.deleteIfExists(Paths.get("My match.match"));
+
+    Files.deleteIfExists(Paths.get(fileName));
   }
 
   private boolean compareMatch(Match match1, Match match2) {
