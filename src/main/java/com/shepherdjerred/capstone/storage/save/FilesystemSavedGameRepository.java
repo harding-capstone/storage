@@ -1,15 +1,15 @@
 package com.shepherdjerred.capstone.storage.save;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.shepherdjerred.capstone.logic.match.Match;
-import com.shepherdjerred.capstone.logic.piece.Piece;
-import com.shepherdjerred.capstone.logic.
+import com.shepherdjerred.capstone.logic.match.serialization.MatchJsonSerializer;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
@@ -18,15 +18,7 @@ import java.util.stream.Stream;
 
 public class FilesystemSavedGameRepository implements SavedGameRepository {
 
-  private static Gson gson;
-
-  static {
-    gson = new GsonBuilder()
-        .registerTypeAdapter(Piece.class, new AbstractClassGsonAdapter())
-        .enableComplexMapKeySerialization()
-        .create();
-  }
-
+  private static MatchJsonSerializer serializer = new MatchJsonSerializer();
   private final Path directory;
 
   public FilesystemSavedGameRepository(Path directory) {
@@ -57,21 +49,18 @@ public class FilesystemSavedGameRepository implements SavedGameRepository {
 
   @Override
   public Optional<Match> loadMatch(SavedGame savedGame) throws IOException {
-    try (var reader = new FileReader(savedGame.getName())) {
-      var match = gson.fromJson(reader, Match.class);
-      if (match != null) {
-        return Optional.of(match);
-      }
+    String fileAsString = Files.readString(Paths.get(savedGame.getName()));
+    var match = serializer.fromJsonString(fileAsString);
+    if (match != null) {
+      return Optional.of(match);
     }
     return Optional.empty();
   }
 
   @Override
   public void saveMatch(String name, Match match) throws IOException {
-    var serializer = new MatchJsonSerializer();
-
     try (var writer = new FileWriter(name)) {
-      gson.toJson(match, writer);
+      writer.write(serializer.toJsonString(match));
     }
   }
 }

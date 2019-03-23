@@ -3,17 +3,19 @@ package com.shepherdjerred.capstone.storage;
 import com.shepherdjerred.capstone.logic.board.BoardSettings;
 import com.shepherdjerred.capstone.logic.match.Match;
 import com.shepherdjerred.capstone.logic.match.MatchSettings;
+import com.shepherdjerred.capstone.logic.match.serialization.MatchJsonSerializer;
 import com.shepherdjerred.capstone.logic.player.PlayerCount;
 import com.shepherdjerred.capstone.logic.player.QuoridorPlayer;
 import com.shepherdjerred.capstone.storage.save.FilesystemSavedGameRepository;
 import com.shepherdjerred.capstone.storage.save.SavedGameFile;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
-import org.junit.Ignore;
+import org.junit.Assert;
 import org.junit.Test;
 
-@Ignore
 public class MyTest {
 
   @Test
@@ -34,6 +36,16 @@ public class MyTest {
     var savedGame = new SavedGameFile("My match.match", Instant.now(), currentRelativePath);
     var loadedGame = repository.loadMatch(savedGame);
 
-    System.out.println(match.equals(loadedGame.get()));
+    Assert.assertTrue(loadedGame.isPresent());
+    Assert.assertTrue(compareMatch(match, loadedGame.get()));
+    
+    Files.deleteIfExists(Paths.get("My match.match"));
+  }
+
+  private boolean compareMatch(Match match1, Match match2) {
+    String match1String = new MatchJsonSerializer().toJsonString(match1);
+    String match2String = new MatchJsonSerializer().toJsonString(match2);
+
+    return match1String.equals(match2String);
   }
 }
