@@ -8,32 +8,26 @@ import com.shepherdjerred.capstone.logic.player.PlayerCount;
 import com.shepherdjerred.capstone.logic.player.QuoridorPlayer;
 import com.shepherdjerred.capstone.storage.save.FilesystemSavedGameRepository;
 import com.shepherdjerred.capstone.storage.save.SavedGameFile;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class MyTest {
+public class FileSaveTests {
 
-  private String fileName = "My match.match";
+  private Match match = Match.from(new MatchSettings(10, QuoridorPlayer.ONE, PlayerCount.TWO),
+      new BoardSettings(9, PlayerCount.TWO));
+  private Path currentRelativePath = Paths.get("").toAbsolutePath();
+  private FilesystemSavedGameRepository repository = new FilesystemSavedGameRepository(currentRelativePath);
 
   @Test
   public void testSaves() throws IOException {
-    var currentRelativePath = Paths.get("").toAbsolutePath();
-
-    System.out.println(currentRelativePath.toString());
-
-    var repository = new FilesystemSavedGameRepository(currentRelativePath);
-    var match = Match.from(new MatchSettings(10, QuoridorPlayer.ONE, PlayerCount.TWO),
-        new BoardSettings(9, PlayerCount.TWO));
+    String fileName = "My match.match";
 
     repository.saveMatch(fileName, match);
-
-    var savedGames = repository.getSaves();
-    System.out.println(savedGames);
 
     var savedGame = new SavedGameFile(fileName, Instant.now(), currentRelativePath);
     var loadedGame = repository.loadMatch(savedGame);
@@ -42,6 +36,40 @@ public class MyTest {
     Assert.assertTrue(compareMatch(match, loadedGame.get()));
 
     Files.deleteIfExists(Paths.get(fileName));
+  }
+
+  @Test
+  public void getAllSaves() throws IOException {
+    repository.saveMatch("Match1.match", match);
+    repository.saveMatch("Match2.match", match);
+    repository.saveMatch("Match3.match", match);
+
+    var savedGames = repository.getSaves();
+
+    Assert.assertEquals(3, savedGames.size());
+
+    Files.deleteIfExists(Paths.get("Match1.match"));
+    Files.deleteIfExists(Paths.get("Match2.match"));
+    Files.deleteIfExists(Paths.get("Match3.match"));
+  }
+
+  @Test
+  public void deleteSave() throws IOException {
+    repository.saveMatch("Match1.match", match);
+    repository.saveMatch("Match2.match", match);
+    repository.saveMatch("Match3.match", match);
+
+    var savedGames = repository.getSaves();
+
+    Assert.assertEquals(3, savedGames.size());
+
+    repository.deleteSave("Match1.match");
+    repository.deleteSave("Match2.match");
+    repository.deleteSave("Match3.match");
+
+    savedGames = repository.getSaves();
+
+    Assert.assertEquals(0, savedGames.size());
   }
 
   private boolean compareMatch(Match match1, Match match2) {

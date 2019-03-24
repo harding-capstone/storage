@@ -2,11 +2,8 @@ package com.shepherdjerred.capstone.storage.save;
 
 import com.shepherdjerred.capstone.logic.match.Match;
 import com.shepherdjerred.capstone.logic.match.serialization.MatchJsonSerializer;
-import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,5 +59,9 @@ public class FilesystemSavedGameRepository implements SavedGameRepository {
     try (var writer = new FileWriter(name)) {
       writer.write(serializer.toJsonString(match));
     }
+  }
+
+  public void deleteSave(String name) throws IOException {
+    Files.deleteIfExists(Paths.get(name));
   }
 }
