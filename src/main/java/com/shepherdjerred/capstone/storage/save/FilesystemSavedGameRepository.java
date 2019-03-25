@@ -1,15 +1,12 @@
 package com.shepherdjerred.capstone.storage.save;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.shepherdjerred.capstone.logic.board.BoardPieces;
 import com.shepherdjerred.capstone.logic.match.Match;
-import com.shepherdjerred.capstone.logic.serialization.BoardPiecesDeserializer;
-import java.io.FileReader;
+import com.shepherdjerred.capstone.logic.match.serialization.MatchJsonSerializer;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
@@ -18,14 +15,7 @@ import java.util.stream.Stream;
 
 public class FilesystemSavedGameRepository implements SavedGameRepository {
 
-  private static Gson gson;
-
-  static {
-    gson = new GsonBuilder()
-        .registerTypeAdapter(BoardPieces.class, new BoardPiecesDeserializer())
-        .create();
-  }
-
+  private static MatchJsonSerializer serializer = new MatchJsonSerializer();
   private final Path directory;
 
   public FilesystemSavedGameRepository(Path directory) {
@@ -56,11 +46,10 @@ public class FilesystemSavedGameRepository implements SavedGameRepository {
 
   @Override
   public Optional<Match> loadMatch(SavedGame savedGame) throws IOException {
-    try (var reader = new FileReader(savedGame.getName())) {
-      var match = gson.fromJson(reader, Match.class);
-      if (match != null) {
-        return Optional.of(match);
-      }
+    String fileAsString = Files.readString(Paths.get(savedGame.getName()));
+    var match = serializer.fromJsonString(fileAsString);
+    if (match != null) {
+      return Optional.of(match);
     }
     return Optional.empty();
   }
@@ -68,7 +57,11 @@ public class FilesystemSavedGameRepository implements SavedGameRepository {
   @Override
   public void saveMatch(String name, Match match) throws IOException {
     try (var writer = new FileWriter(name)) {
-      gson.toJson(match, writer);
+      writer.write(serializer.toJsonString(match));
     }
+  }
+
+  public void deleteSave(String name) throws IOException {
+    Files.deleteIfExists(Paths.get(name));
   }
 }
